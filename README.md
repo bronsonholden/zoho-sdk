@@ -1,5 +1,7 @@
 # Zoho SDK
 
+[![Build Status](https://travis-ci.org/paulholden2/zoho-sdk.svg?branch=master)](https://travis-ci.org/paulholden2/zoho-sdk)
+
 A library for interacting with Zoho applications via REST API.
 
 ## Installation
