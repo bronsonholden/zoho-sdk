@@ -3,7 +3,12 @@ require "simplecov"
 SimpleCov.start
 
 require "bundler/setup"
+require "webmock/rspec"
+require "support/analytics"
+require "support/analytics/service"
 require "zoho-sdk"
+
+WebMock.disable_net_connect!(allow_localhost: true)
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -14,5 +19,9 @@ RSpec.configure do |config|
 
   config.expect_with :rspec do |c|
     c.syntax = :expect
+  end
+
+  config.before(:each) do
+    stub_request(:any, /#{Regexp.escape(Zoho::Analytics::API_HOSTNAME)}\/.*/).to_rack(Zoho::Support::Analytics::Service)
   end
 end
