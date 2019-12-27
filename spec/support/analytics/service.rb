@@ -5,13 +5,14 @@ module Zoho
   module Support
     module Analytics
       class Service < Sinatra::Base
-        get "/:email" do
+        get "/api/:email" do
           [
-            WorkspaceMetadata
+            WorkspaceMetadata,
+            IsWorkspaceExist
           ].each { |method|
             m = method.new
-            if m.match?(method_params) && false
-              return json_response 200, {}.to_json # TODO: Method response
+            if m.match?(method_params)
+              return json_response m.status, m.response.to_json
             end
           }
 
