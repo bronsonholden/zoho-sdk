@@ -2,7 +2,11 @@ module Zoho
   module Support
     module Analytics
       class Method
-        def match?(params)
+        def initialize(params)
+          @params = params
+        end
+
+        def match?
           false
         end
 
@@ -21,3 +25,4 @@ end
 
 require "support/analytics/method/workspace_metadata"
 require "support/analytics/method/is_workspace_exist"
+require "support/analytics/method/is_column_exist"

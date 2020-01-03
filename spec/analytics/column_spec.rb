@@ -1,9 +1,10 @@
 RSpec.describe Zoho::Analytics::Column do
   let(:workspace) { client.workspace("Workspace") }
   let(:table) { workspace.table("Table") }
-  let(:column) { table.column("Column") }
+  let(:name) { "Missing Column" }
+  let(:column) { table.column(name) }
 
-  describe "#new" do
+  describe "#create" do
     shared_examples "valid column" do
       it "does not raise error" do
         expect { column.create type: type }.not_to raise_error
@@ -26,6 +27,21 @@ RSpec.describe Zoho::Analytics::Column do
     context "with invalid type" do
       let(:type) { :not_a_type }
       include_examples "invalid column"
+    end
+  end
+
+  describe "#exists" do
+    context "with missing" do
+      it "does not exist" do
+        expect(column.exists?).to eq(false)
+      end
+    end
+
+    context "with existing" do
+      let(:name) { "Column" }
+      it "exists" do
+        expect(column.exists?).to eq(true)
+      end
     end
   end
 end

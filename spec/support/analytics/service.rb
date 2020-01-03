@@ -10,8 +10,21 @@ module Zoho
             WorkspaceMetadata,
             IsWorkspaceExist
           ].each { |method|
-            m = method.new
-            if m.match?(method_params)
+            m = method.new(method_params)
+            if m.match?
+              return json_response m.status, m.response.to_json
+            end
+          }
+
+          status 404
+        end
+
+        get "/api/:email/:workspace/:table" do
+          [
+            IsColumnExist
+          ].each { |method|
+            m = method.new(method_params)
+            if m.match?
               return json_response m.status, m.response.to_json
             end
           }

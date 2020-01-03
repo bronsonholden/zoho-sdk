@@ -3,7 +3,7 @@ RSpec.describe Zoho::Analytics::Workspace do
 
   describe "#exists?" do
     it "returns true for existing workspace" do
-      expect(workspace.exists?).to eq("true")
+      expect(workspace.exists?).to eq(true)
     end
   end
 end
