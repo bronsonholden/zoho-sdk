@@ -1,4 +1,5 @@
 require "faraday"
+require "json"
 require "zoho-sdk/analytics/workspace"
 
 module ZohoSdk
