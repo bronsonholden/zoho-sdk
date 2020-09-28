@@ -22,31 +22,6 @@ module ZohoSdk::Analytics
       @name = name
       @table = table
       @client = client
-      @exists
-    end
-
-    def type
-      if exists?
-        @type
-      else
-        # GET column info
-      end
-    end
-
-    def description
-      if exists?
-        @description
-      else
-        # GET column info
-      end
-    end
-
-    def required?
-      if exists?
-        @required
-      else
-        # GET column info
-      end
     end
   end
 end
