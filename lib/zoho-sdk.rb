@@ -1,7 +1,7 @@
 require "zoho-sdk/version"
 require "zoho-sdk/analytics"
 
-module Zoho
+module ZohoSdk
   class Error < StandardError; end
 
   class ColumnAlreadyExistsError < Error

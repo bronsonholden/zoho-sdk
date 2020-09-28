@@ -1,3 +1,3 @@
-module Zoho
+module ZohoSdk
   VERSION = "0.1.0"
 end

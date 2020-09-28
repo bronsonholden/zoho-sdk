@@ -1,19 +1,19 @@
 module ZohoSdk
   module TestService
     module Analytics
-      class IsColumnExist < Method
+      class IsViewExist < Method
         def match?
-          @params["ZOHO_ACTION"] == "ISCOLUMNEXIST" && @params["ZOHO_COLUMN_NAME"].is_a?(String)
+          @params["ZOHO_ACTION"] == "ISVIEWEXIST" && @params["ZOHO_VIEW_NAME"].is_a?(String)
         end
 
         def response
-          m = @params["ZOHO_COLUMN_NAME"].match(/(?i)Missing/)
+          m = @params["ZOHO_VIEW_NAME"].match(/(?i)Missing/)
           {
             "response" => {
               "uri" => "/api/name@email.com",
-              "action" => "ISCOLUMNEXIST",
+              "action" => "ISVIEWEXIST",
               "result" => {
-                "iscolumnexist" => m.nil?.to_s
+                "isviewexist" => m.nil?.to_s
               }
             }
           }

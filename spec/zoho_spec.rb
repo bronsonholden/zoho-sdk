@@ -1,5 +1,5 @@
-RSpec.describe Zoho do
+RSpec.describe ZohoSdk do
   it "has a version number" do
-    expect(Zoho::VERSION).not_to be nil
+    expect(ZohoSdk::VERSION).not_to be nil
   end
 end

@@ -1,2 +1,2 @@
-RSpec.describe Zoho::Analytics::Client do
+RSpec.describe ZohoSdk::Analytics::Client do
 end

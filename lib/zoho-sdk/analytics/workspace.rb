@@ -1,15 +1,16 @@
 require "zoho-sdk/analytics/table"
 
-module Zoho
+module ZohoSdk
   module Analytics
     class Workspace
-      attr_reader :name
-
-      def initialize(name, client)
-        @name = name
+      def initialize(workspace_name, client)
+        @workspace_name = workspace_name
         @client = client
-        @metadata
-        @exists
+        @metadata = nil
+      end
+
+      def name
+        @workspace_name
       end
 
       def metadata
@@ -30,29 +31,11 @@ module Zoho
         end
       end
 
-      def exists?
-        return @exists if !@exists.nil?
-        res = @client.get params: {
-          "ZOHO_ACTION" => "ISDBEXIST",
-          "ZOHO_DB_NAME" => name
-        }
-        if res.success?
-          data = JSON.parse(res.body)
-          if data.dig("response", "result", "isdbexist") == "true"
-            @exists = true
-          else
-            @exists = false
-          end
-        else
-          # Raise
-        end
-      end
-
       def create(description: "")
         return if exists?
         res = @client.get params: {
           "ZOHO_ACTION" => "CREATEBLANKDB",
-          "ZOHO_DATABASE_NAME" => name,
+          "ZOHO_DATABASE_NAME" => workspace_name,
           "ZOHO_DATABASE_DESC" => description
         }
         if res.success?
@@ -62,12 +45,37 @@ module Zoho
         end
       end
 
-      def delete
+      def create_table(table_name, folder, **opts)
+        table_design = {
+          "TABLENAME" => table_name,
+          "TABLEDESCRIPTION" => opts[:description] || "",
+          "FOLDERNAME" => folder || "",
+          "COLUMNS" => []
+        }.to_json
+        res = @client.get path: name, params: {
+          "ZOHO_ACTION" => "CREATETABLE",
+          "ZOHO_TABLE_DESIGN" => table_design
+        }
+        if res.success?
+          data = JSON.parse(res.body)
+          ZohoSdk::Analytics::Table.new(name, self, @client)
+        else
+          nil
+        end
       end
 
-      def table(name)
-        if exists?
-          Zoho::Analytics::Table.new(name, self, @client)
+      def table(table_name)
+        res = @client.get path: name, params: {
+          "ZOHO_ACTION" => "ISVIEWEXIST",
+          "ZOHO_VIEW_NAME" => table_name
+        }
+        if res.success?
+          data = JSON.parse(res.body)
+          if data.dig("response", "result", "isviewexist") == "true"
+            ZohoSdk::Analytics::Table.new(table_name, self, @client)
+          else
+            nil
+          end
         else
           nil
         end

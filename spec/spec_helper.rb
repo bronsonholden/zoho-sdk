@@ -21,7 +21,7 @@ module GlobalContext
 
   let(:email) { ENV["SPEC_ZOHO_EMAIL"] || "user@email.com" }
   let(:auth_token) { ENV["SPEC_ZOHO_AUTHTOKEN"] || "authtoken" }
-  let(:client) { Zoho::Analytics::Client.new(email, auth_token) }
+  let(:client) { ZohoSdk::Analytics::Client.new(email, auth_token) }
 end
 
 RSpec.configure do |config|
@@ -39,7 +39,7 @@ RSpec.configure do |config|
 
   if stub
     config.before(:each) do
-      stub_request(:any, /#{Regexp.escape(Zoho::Analytics::API_HOSTNAME)}\/.*/).to_rack(Zoho::Support::Analytics::Service)
+      stub_request(:any, /#{Regexp.escape(ZohoSdk::Analytics::API_HOSTNAME)}\/.*/).to_rack(ZohoSdk::TestService::Analytics::Service)
     end
   end
 end

@@ -1,67 +1,75 @@
 require "zoho-sdk/analytics/column"
+require "uri"
 
-module Zoho
+module ZohoSdk
   module Analytics
     class Table
-      attr_reader :name
       attr_reader :workspace
       attr_reader :columns
 
-      def initialize(name, workspace, client, columns: [])
-        @name = name
+      def initialize(table_name, workspace, client, columns: [])
+        @table_name = table_name
         @workspace = workspace
         @client = client
         @columns = columns
         @exists
       end
 
-      def exists?
-        return @exists if !@exists.nil?
-        res = @client.get params: {
-          "ZOHO_ACTION" => "ISDBEXIST",
-          "ZOHO_DB_NAME" => name
-        }
-        if res.success?
-          data = JSON.parse(res.body)
-          if data.dig("response", "result", "isdbexist") == "true"
-            @exists = true
-          else
-            @exists = false
-          end
-        else
-          # Raise
-        end
+      def name
+        @table_name
       end
 
-      def create(name:, folder: "", description: "")
-        table_design = {
-          "TABLENAME" => name,
-          "TABLEDESCRIPTION" => description,
-          "FOLDERNAME" => folder,
-          "COLUMNS" => []
-        }.to_json
-        res = @client.get path: workspace.name, params: {
-          "ZOHO_ACTION" => "CREATETABLE",
-          "ZOHO_TABLE_DESIGN" => table_design
+      def create_column(name, type, **opts)
+        if !Column::DATA_TYPES.include?(type)
+          raise ArgumentError.new("Column type must be one of: #{Column::DATA_TYPES.join(', ')}")
+        end
+        @type = type
+        @required = opts[:required] || false
+        @description = opts[:description] || ""
+        res = @client.get path: "#{workspace.name}/#{URI.encode(name)}", params: {
+          "ZOHO_ACTION" => "ADDCOLUMN",
+          "ZOHO_COLUMNNAME" => name,
+          "ZOHO_DATATYPE" => type.to_s.upcase
         }
         if res.success?
           data = JSON.parse(res.body)
+          ZohoSdk::Analytics::Column.new(name, self, @client)
         else
-          # Raise
+          nil
         end
       end
 
       def column(name)
-        col = Zoho::Analytics::Column.new(name, self, @client)
-        @columns << col
-        col
+        res = @client.get path: "#{workspace.name}/#{URI.encode(name)}", params: {
+          "ZOHO_ACTION" => "ISCOLUMNEXIST",
+          "ZOHO_COLUMN_NAME" => name
+        }
+        if res.success?
+          data = JSON.parse(res.body)
+          if data.dig("response", "result", "iscolumnexist") == "true"
+            col = ZohoSdk::Analytics::Column.new(name, self, @client)
+            @columns << col
+            col
+          else
+            nil
+          end
+        else
+          nil
+        end
       end
 
       def rows
+        res = @client.get path: "#{workspace.name}/#{name}", params: {
+          "ZOHO_ACTION" => "EXPORT"
+        }
       end
 
       def <<(row)
         params = { "ZOHO_ACTION" => "ADDROW" }
+        # TODO: Reject ZOHO_ACTION, ZOHO_OUTPUT_FORMAT, etc.
+        row.each { |key, value|
+          params[key] = value
+        }
         @client.get path: "#{workspace.name}/#{name}", params: params
       end
     end

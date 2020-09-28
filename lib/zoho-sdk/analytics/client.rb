@@ -1,7 +1,7 @@
 require "faraday"
 require "zoho-sdk/analytics/workspace"
 
-module Zoho
+module ZohoSdk
   module Analytics
     API_HOSTNAME = "https://analyticsapi.zoho.com".freeze
     API_PATH = "api".freeze
@@ -21,7 +21,20 @@ module Zoho
       end
 
       def workspace(name)
-        Zoho::Analytics::Workspace.new(name, self)
+        res = get params: {
+          "ZOHO_ACTION" => "ISDBEXIST",
+          "ZOHO_DB_NAME" => name
+        }
+        if res.success?
+          data = JSON.parse(res.body)
+          if data.dig("response", "result", "isdbexist") == "true"
+            ZohoSdk::Analytics::Workspace.new(name, self)
+          else
+            nil
+          end
+        else
+          nil
+        end
       end
 
       def get(path: nil, params: {})

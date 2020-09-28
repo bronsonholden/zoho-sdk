@@ -1,5 +1,5 @@
-module Zoho
-  module Support
+module ZohoSdk
+  module TestService
     module Analytics
       class Method
         def initialize(params)
@@ -26,3 +26,4 @@ end
 require "support/analytics/method/workspace_metadata"
 require "support/analytics/method/is_workspace_exist"
 require "support/analytics/method/is_column_exist"
+require "support/analytics/method/is_view_exist"

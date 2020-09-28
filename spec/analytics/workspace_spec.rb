@@ -1,19 +1,17 @@
-RSpec.describe Zoho::Analytics::Workspace do
-  let(:name) { "Missing Workspace" }
+RSpec.describe ZohoSdk::Analytics::Workspace do
+  let(:name) { "Workspace" }
   let(:workspace) { client.workspace(name) }
 
-  describe "#exists?" do
-    context "with existing" do
-      let(:name) { "Workspace" }
-      it "exists" do
-        expect(workspace.exists?).to eq(true)
-      end
+  context "existing" do
+    it "exists" do
+      expect(workspace).not_to be_nil
     end
+  end
 
-    context "with missing" do
-      it "does not exist" do
-        expect(workspace.exists?).to eq(false)
-      end
+  context "missing" do
+    let(:name) { "Missing Workspace" }
+    it "does not exist" do
+      expect(workspace).to be_nil
     end
   end
 end

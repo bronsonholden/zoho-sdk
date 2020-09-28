@@ -1,5 +1,5 @@
-module Zoho
-  module Support
+module ZohoSdk
+  module TestService
     module Analytics
       class IsWorkspaceExist < Method
         def match?
