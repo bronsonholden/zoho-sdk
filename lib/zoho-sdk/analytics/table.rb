@@ -6,6 +6,7 @@ module ZohoSdk
     class Table
       attr_reader :workspace
       attr_reader :columns
+      attr_reader :client
 
       def initialize(table_name, workspace, client, columns: [])
         @table_name = table_name
@@ -26,28 +27,28 @@ module ZohoSdk
         @type = type
         @required = opts[:required] || false
         @description = opts[:description] || ""
-        res = @client.get path: "#{workspace.name}/#{URI.encode(name)}", params: {
+        res = client.get path: "#{workspace.name}/#{URI.encode(name)}", params: {
           "ZOHO_ACTION" => "ADDCOLUMN",
           "ZOHO_COLUMNNAME" => name,
           "ZOHO_DATATYPE" => type.to_s.upcase
         }
         if res.success?
           data = JSON.parse(res.body)
-          ZohoSdk::Analytics::Column.new(name, self, @client)
+          ZohoSdk::Analytics::Column.new(name, self, client)
         else
           nil
         end
       end
 
       def column(name)
-        res = @client.get path: "#{workspace.name}/#{URI.encode(name)}", params: {
+        res = client.get path: "#{workspace.name}/#{URI.encode(name)}", params: {
           "ZOHO_ACTION" => "ISCOLUMNEXIST",
           "ZOHO_COLUMN_NAME" => name
         }
         if res.success?
           data = JSON.parse(res.body)
           if data.dig("response", "result", "iscolumnexist") == "true"
-            col = ZohoSdk::Analytics::Column.new(name, self, @client)
+            col = ZohoSdk::Analytics::Column.new(name, self, client)
             @columns << col
             col
           else
@@ -59,7 +60,7 @@ module ZohoSdk
       end
 
       def rows
-        res = @client.get path: "#{workspace.name}/#{name}", params: {
+        res = client.get path: "#{workspace.name}/#{name}", params: {
           "ZOHO_ACTION" => "EXPORT"
         }
       end
@@ -70,7 +71,7 @@ module ZohoSdk
         row.each { |key, value|
           params[key] = value
         }
-        @client.get path: "#{workspace.name}/#{name}", params: params
+        client.get path: "#{workspace.name}/#{name}", params: params
       end
     end
   end
