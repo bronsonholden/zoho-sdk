@@ -19,7 +19,7 @@ module ZohoSdk::Analytics
       @table_name
     end
 
-    def create_column(name, type, **opts)
+    def create_column(column_name, type, **opts)
       if !Column::DATA_TYPES.include?(type)
         raise ArgumentError.new("Column type must be one of: #{Column::DATA_TYPES.join(', ')}")
       end
@@ -28,12 +28,12 @@ module ZohoSdk::Analytics
       @description = opts[:description] || ""
       res = client.get path: "#{workspace.name}/#{URI.encode(name)}", params: {
         "ZOHO_ACTION" => "ADDCOLUMN",
-        "ZOHO_COLUMNNAME" => name,
+        "ZOHO_COLUMNNAME" => column_name,
         "ZOHO_DATATYPE" => type.to_s.upcase
       }
       if res.success?
         data = JSON.parse(res.body)
-        Column.new(name, self, client)
+        Column.new(column_name, self, client)
       else
         nil
       end
