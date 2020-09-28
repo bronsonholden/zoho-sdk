@@ -4,7 +4,7 @@ module ZohoSdk
       DATA_TYPES = %i[plain multi_line email number positive_number date url
                       decimal_number currency percent boolean auto_number].freeze
 
-      attr_accessor :name, :table
+      attr_reader :name, :table
 
       def initialize(name, table, client)
         @name = name
