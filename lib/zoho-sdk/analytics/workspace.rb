@@ -16,10 +16,10 @@ module ZohoSdk::Analytics
 
     def metadata
       return @metadata if !@metadata.nil?
-      load!
+      metadata!
     end
 
-    def load!
+    def metadata!
       res = client.get path: name, params: {
         "ZOHO_ACTION" => "DATABASEMETADATA",
         "ZOHO_METADATA" => "ZOHO_CATALOG_INFO"
@@ -27,8 +27,9 @@ module ZohoSdk::Analytics
       if res.success?
         data = JSON.parse(res.body)
         @metadata = data.dig("response", "result")
+        @metadata
       else
-        # Raise
+        nil
       end
     end
 
