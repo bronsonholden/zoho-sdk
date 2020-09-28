@@ -21,7 +21,7 @@ RSpec.describe ZohoSdk::Analytics::Column do
       end
     end
 
-    ZohoSdk::Analytics::Column::DATA_TYPES.each { |type|
+    ZohoSdk::Analytics::Column::DATA_TYPES.values.each { |type|
       context "with #{type} type" do
         let(:type) { type }
         include_examples "valid column"

@@ -1,7 +1,20 @@
 module ZohoSdk::Analytics
   class Column
-    DATA_TYPES = %i[plain multi_line email number positive_number date url
-                    decimal_number currency percent boolean auto_number].freeze
+    DATA_TYPES = {
+      "Auto" => :system,
+      "Plain Text" => :plain,
+      "E-Mail" => :email,
+      "Multi Line Text" => :multi,
+      "URL" => :url,
+      "Number" => :number,
+      "Auto Number" => :auto_number,
+      "Positive Number" => :positive_number,
+      "Decimal Number" => :decimal_number,
+      "Currency" => :currency,
+      "Percentage" => :percentage,
+      "Date" => :date,
+      "Yes/No Decision" => :boolean
+    }.freeze
 
     attr_reader :name, :table
 

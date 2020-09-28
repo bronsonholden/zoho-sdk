@@ -20,8 +20,8 @@ module ZohoSdk::Analytics
     end
 
     def create_column(column_name, type, **opts)
-      if !Column::DATA_TYPES.include?(type)
-        raise ArgumentError.new("Column type must be one of: #{Column::DATA_TYPES.join(', ')}")
+      if !Column::DATA_TYPES.values.include?(type)
+        raise ArgumentError.new("Column type must be one of: #{Column::DATA_TYPES.values.join(', ')}")
       end
       @type = type
       @required = opts[:required] || false
