@@ -67,11 +67,27 @@ module ZohoSdk
 
       def <<(row)
         params = { "ZOHO_ACTION" => "ADDROW" }
-        # TODO: Reject ZOHO_ACTION, ZOHO_OUTPUT_FORMAT, etc.
-        row.each { |key, value|
-          params[key] = value
-        }
-        client.get path: "#{workspace.name}/#{name}", params: params
+        restricted = %w(
+          ZOHO_ACTION
+          ZOHO_API_VERSION
+          ZOHO_OUTPUT_FORMAT
+          ZOHO_ERROR_FORMAT
+          authtoken
+        )
+
+        params = row.reject { |key|
+          !key.is_a?(String) || restricted.include?(key)
+        }.merge(params)
+
+        res = client.get path: "#{workspace.name}/#{name}", params: params
+        if res.success?
+          data = JSON.parse(res.body)
+          columns = data.dig("response", "result", "column_order")
+          values = data.dig("response", "result", "rows", 0)
+          columns.zip(values).to_h
+        else
+          nil
+        end
       end
     end
   end
