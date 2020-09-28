@@ -31,20 +31,6 @@ module ZohoSdk
         end
       end
 
-      def create(description: "")
-        return if exists?
-        res = @client.get params: {
-          "ZOHO_ACTION" => "CREATEBLANKDB",
-          "ZOHO_DATABASE_NAME" => workspace_name,
-          "ZOHO_DATABASE_DESC" => description
-        }
-        if res.success?
-          data = JSON.parse(res.body)
-        else
-          # Raise
-        end
-      end
-
       def create_table(table_name, folder, **opts)
         table_design = {
           "TABLENAME" => table_name,
