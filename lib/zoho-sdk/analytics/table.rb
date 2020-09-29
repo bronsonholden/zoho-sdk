@@ -103,6 +103,30 @@ module ZohoSdk::Analytics
       end
     end
 
+    def delete(criteria)
+      if criteria.nil?
+        raise ArgumentError.new("Delete criteria must be specified")
+      end
+
+      delete!(criteria)
+    end
+
+    def delete!(criteria = nil)
+      params = {
+        "ZOHO_ACTION" => "DELETE"
+      }
+
+      params["ZOHO_CRITERIA"] = criteria if !criteria.nil?
+
+      res = client.get path: "#{workspace.name}/#{name}", params: params
+      if res.success?
+        data = JSON.parse(res.body)
+        data.dig("response", "result", "deletedrows").to_i
+      else
+        nil
+      end
+    end
+
     def <<(row)
       params = { "ZOHO_ACTION" => "ADDROW" }
       restricted = %w(
