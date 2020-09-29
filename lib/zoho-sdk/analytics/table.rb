@@ -3,6 +3,12 @@ require "uri"
 
 module ZohoSdk::Analytics
   class Table
+    IMPORT_TYPES = {
+      :append => "APPEND",
+      :truncate_add => "TRUNCATEADD",
+      :update_add => "UPDATEADD"
+    }.freeze
+
     attr_reader :workspace
     attr_reader :columns
     attr_reader :client
@@ -62,6 +68,39 @@ module ZohoSdk::Analytics
       res = client.get path: "#{workspace.name}/#{name}", params: {
         "ZOHO_ACTION" => "EXPORT"
       }
+    end
+
+    def import(import_type, data, **opts)
+      if !IMPORT_TYPES.keys.include?(import_type)
+        raise ArgumentError.new("import_type must be one of: #{IMPORT_TYPES.keys.join(', ')}")
+      end
+
+      params = {
+        "ZOHO_ACTION" => "IMPORT",
+        "ZOHO_IMPORT_DATA" => data.to_json,
+        "ZOHO_IMPORT_TYPE" => IMPORT_TYPES[import_type],
+        "ZOHO_IMPORT_FILETYPE" => "JSON",
+        "ZOHO_ON_IMPORT_ERROR" => "ABORT",
+        "ZOHO_CREATE_TABLE" => "false",
+        "ZOHO_AUTO_IDENTIFY" => "false"
+      }
+
+      if import_type == :update_add
+        matching = opts[:matching] || []
+        if !matching.is_a?(Array) || matching.size < 1
+          raise ArgumentError.new("Must pass at least one column in `matching` option for UPDATEADD")
+        end
+
+        params["ZOHO_MATCHING_COLUMNS"] = matching.join(',')
+      end
+
+      res = client.get path: "#{workspace.name}/#{name}", params: params
+      if res.success?
+        data = JSON.parse(res.body)
+        data.dig("response", "result", "importSummary", "successRowCount")
+      else
+        nil
+      end
     end
 
     def <<(row)
