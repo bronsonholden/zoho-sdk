@@ -21,8 +21,7 @@ module ZohoSdk::Analytics
     end
 
     def create_workspace(name, **opts)
-      return if exists?
-      res = @client.get params: {
+      res = get params: {
         "ZOHO_ACTION" => "CREATEBLANKDB",
         "ZOHO_DATABASE_NAME" => name,
         "ZOHO_DATABASE_DESC" => opts[:description] || ""
