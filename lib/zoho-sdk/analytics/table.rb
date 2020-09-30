@@ -77,7 +77,6 @@ module ZohoSdk::Analytics
 
       params = {
         "ZOHO_ACTION" => "IMPORT",
-        "ZOHO_IMPORT_DATA" => data.to_json,
         "ZOHO_IMPORT_TYPE" => IMPORT_TYPES[import_type],
         "ZOHO_IMPORT_FILETYPE" => "JSON",
         "ZOHO_ON_IMPORT_ERROR" => "ABORT",
@@ -94,7 +93,7 @@ module ZohoSdk::Analytics
         params["ZOHO_MATCHING_COLUMNS"] = matching.join(',')
       end
 
-      res = client.get path: "#{workspace.name}/#{name}", params: params
+      res = client.post_json path: "#{workspace.name}/#{name}", io: StringIO.new(data.to_json), params: params
       if res.success?
         data = JSON.parse(res.body)
         data.dig("response", "result", "importSummary", "successRowCount")

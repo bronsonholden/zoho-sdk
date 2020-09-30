@@ -53,15 +53,7 @@ module ZohoSdk::Analytics
     end
 
     def get(path: nil, params: {})
-      parts = [API_BASE_URL, @email]
-      if !path.nil?
-        if path[0] == "/"
-          path = path[1..-1]
-        end
-        parts << path
-      end
-      url = URI.encode(parts.join("/"))
-      conn = Faraday.new(url: url)
+      conn = Faraday.new(url: url_for(path))
       res = conn.get do |req|
         req.params["ZOHO_OUTPUT_FORMAT"] = "JSON"
         req.params["ZOHO_ERROR_FORMAT"] = "JSON"
@@ -71,6 +63,41 @@ module ZohoSdk::Analytics
           req.params[key] = value
         }
       end
+    end
+
+    def post_json(path: nil, io:, params: {})
+      conn = Faraday.new(url: url_for(path)) do |conn|
+        conn.request :multipart
+        conn.adapter :net_http
+        conn.headers = {
+          'Content-Type' => 'multipart/form-data'
+        }
+      end
+      res = conn.post do |req|
+        payload = {
+          "ZOHO_OUTPUT_FORMAT" => "JSON",
+          "ZOHO_ERROR_FORMAT" => "JSON",
+          "ZOHO_API_VERSION" => "1.0",
+          "authtoken" => @auth_token
+        }
+        params.merge(payload).each { |key, value|
+          req.params[key] = value
+        }
+        req.body = {
+          "ZOHO_FILE" => Faraday::FilePart.new(io, "application/json", "ZOHO_FILE.json")
+        }
+      end
+    end
+
+    def url_for(path = nil)
+      parts = [API_BASE_URL, @email]
+      if !path.nil?
+        if path[0] == "/"
+          path = path[1..-1]
+        end
+        parts << path
+      end
+      URI.encode(parts.join("/"))
     end
   end
 end
