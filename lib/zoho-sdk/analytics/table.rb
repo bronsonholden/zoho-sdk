@@ -32,7 +32,7 @@ module ZohoSdk::Analytics
       @type = type
       @required = opts[:required] || false
       @description = opts[:description] || ""
-      res = client.get path: "#{workspace.name}/#{URI.encode(name)}", params: {
+      res = client.get path: "#{workspace.name}/#{name}", params: {
         "ZOHO_ACTION" => "ADDCOLUMN",
         "ZOHO_COLUMNNAME" => column_name,
         "ZOHO_DATATYPE" => type.to_s.upcase
@@ -46,7 +46,7 @@ module ZohoSdk::Analytics
     end
 
     def column(name)
-      res = client.get path: "#{workspace.name}/#{URI.encode(name)}", params: {
+      res = client.get path: "#{workspace.name}/#{name}", params: {
         "ZOHO_ACTION" => "ISCOLUMNEXIST",
         "ZOHO_COLUMN_NAME" => name
       }

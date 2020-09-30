@@ -1,5 +1,6 @@
 require "faraday"
 require "json"
+require "uri"
 require "zoho-sdk/analytics/workspace"
 
 module ZohoSdk::Analytics
@@ -59,7 +60,8 @@ module ZohoSdk::Analytics
         end
         parts << path
       end
-      conn = Faraday.new(url: parts.join("/"))
+      url = URI.encode(parts.join("/"))
+      conn = Faraday.new(url: url)
       res = conn.get do |req|
         req.params["ZOHO_OUTPUT_FORMAT"] = "JSON"
         req.params["ZOHO_ERROR_FORMAT"] = "JSON"
