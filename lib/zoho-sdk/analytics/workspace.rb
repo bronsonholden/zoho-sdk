@@ -33,16 +33,16 @@ module ZohoSdk::Analytics
       end
     end
 
-    def create_table(table_name, folder, **opts)
+    def create_table(table_name, folder = nil, **opts)
       table_design = {
         "TABLENAME" => table_name,
         "TABLEDESCRIPTION" => opts[:description] || "",
-        "FOLDERNAME" => folder || "",
         "COLUMNS" => []
-      }.to_json
+      }
+      table_design["FOLDERNAME"] = folder if !folder.nil?
       res = client.get path: name, params: {
         "ZOHO_ACTION" => "CREATETABLE",
-        "ZOHO_TABLE_DESIGN" => table_design
+        "ZOHO_TABLE_DESIGN" => table_design.to_json
       }
       if res.success?
         data = JSON.parse(res.body)
