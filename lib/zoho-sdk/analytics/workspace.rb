@@ -33,6 +33,12 @@ module ZohoSdk::Analytics
       end
     end
 
+    # Create a new table in the workspace.
+    # @param table_name [String] The new table's name
+    # @param folder [String] Folder name to create the table under.
+    # @param opts [Hash] Optional arguments
+    # @option opts [String] :description The table's description
+    # @return [Table] Newly created table
     def create_table(table_name, folder = nil, **opts)
       table_design = {
         "TABLENAME" => table_name,
@@ -52,6 +58,9 @@ module ZohoSdk::Analytics
       end
     end
 
+    # Retrieve a table by name from the workspace
+    # @param table_name [String] The table name
+    # @return [Table]
     def table(table_name)
       res = client.get path: name, params: {
         "ZOHO_ACTION" => "ISVIEWEXIST",

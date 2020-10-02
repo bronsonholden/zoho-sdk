@@ -9,8 +9,10 @@ module ZohoSdk::Analytics
       :update_add => "UPDATEADD"
     }.freeze
 
+    # @return [Workspace] The table's workspace
     attr_reader :workspace
     attr_reader :columns
+    # @return [Client] Client object
     attr_reader :client
 
     def initialize(table_name, workspace, client, columns: [])
@@ -25,6 +27,12 @@ module ZohoSdk::Analytics
       @table_name
     end
 
+    # Create a new column in the table
+    # @param column_name [String] The new column's name
+    # @param type [Symbol] Column data type. See {Column::DATA_TYPES}
+    # @param opts [Hash] Optional arguments
+    # @option opts [Boolean] :required Should the column be mandatory. Defaults to false.
+    # @option opts [String] :description The column's description
     def create_column(column_name, type, **opts)
       if !Column::DATA_TYPES.values.include?(type)
         raise ArgumentError.new("Column type must be one of: #{Column::DATA_TYPES.values.join(', ')}")
@@ -45,6 +53,9 @@ module ZohoSdk::Analytics
       end
     end
 
+    # Retrieve a table column by name
+    # @param name [String] The column name
+    # @return [Column]
     def column(name)
       res = client.get path: "#{workspace.name}/#{name}", params: {
         "ZOHO_ACTION" => "ISCOLUMNEXIST",
@@ -70,6 +81,17 @@ module ZohoSdk::Analytics
       }
     end
 
+    # Import data into the table using one of three methods: :append,
+    # :truncate_add, or :update_add. The :append option simply adds rows to
+    # the end of the table. When using :truncate_add, all rows are first
+    # removed and replaced by the new rows. If :update_add is selected,
+    # the :matching option must be provided to match rows to be updated by
+    # any imported row data.
+    # @param import_type [Symbol] Import type. Must be one of: :append, :truncate_add, :update_add
+    # @param data [Hash] The data to import. Must be a hash with column names as keys and cell contents as values.
+    # @param opts [Hash] Optional arguments
+    # @option opts [Array] :matching Array of column names to match when using :update_add
+    # @raise [ArgumentError]
     def import(import_type, data, **opts)
       if !IMPORT_TYPES.keys.include?(import_type)
         raise ArgumentError.new("import_type must be one of: #{IMPORT_TYPES.keys.join(', ')}")
@@ -102,6 +124,9 @@ module ZohoSdk::Analytics
       end
     end
 
+    # Safer delete option. Deletes rows from the table based on the given
+    # criteria.
+    # @param criteria [String] The row criteria to match when deleting rows.
     def delete(criteria)
       if criteria.nil?
         raise ArgumentError.new("Delete criteria must be specified")
@@ -110,6 +135,9 @@ module ZohoSdk::Analytics
       delete!(criteria)
     end
 
+    # Unsafe delete. Deletes rows based on the given criteria. If not
+    # provided, all rows are deleted.
+    # @param criteria [String] The row criteria to match when deleting rows.
     def delete!(criteria = nil)
       params = {
         "ZOHO_ACTION" => "DELETE"
@@ -126,6 +154,8 @@ module ZohoSdk::Analytics
       end
     end
 
+    # Insert a single row into the table
+    # @param row [Hash] Hash of row data. Column names are keys, and cell contents are values.
     def <<(row)
       params = { "ZOHO_ACTION" => "ADDROW" }
       restricted = %w(

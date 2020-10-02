@@ -8,6 +8,8 @@ module ZohoSdk::Analytics
   API_PATH = "api".freeze
   API_BASE_URL = "#{API_HOSTNAME}/#{API_PATH}".freeze
 
+  # Allows retrieving workspaces, metadata, and other general data not tied
+  # to a specific resource.
   class Client
     def initialize(email, auth_token)
       @email = email
@@ -21,6 +23,11 @@ module ZohoSdk::Analytics
       }
     end
 
+    # Create a new Zoho Analytics workspace
+    # @param name [String] Workspace name
+    # @param opts [Hash] Optional arguments
+    # @option opts [String] :description Workspace description
+    # @return [Workspace] Newly created Workspace
     def create_workspace(name, **opts)
       res = get params: {
         "ZOHO_ACTION" => "CREATEBLANKDB",
@@ -35,6 +42,9 @@ module ZohoSdk::Analytics
       end
     end
 
+    # Retrieve a workspace by name
+    # @param name [String] The workspace name
+    # @return [Workspace]
     def workspace(name)
       res = get params: {
         "ZOHO_ACTION" => "ISDBEXIST",
@@ -52,6 +62,10 @@ module ZohoSdk::Analytics
       end
     end
 
+    # Wrapper for an HTTP GET request via Faraday
+    # @param path [String] URL path component
+    # @param params [Hash] Query parameters for the request
+    # @return [Faraday::Response]
     def get(path: nil, params: {})
       conn = Faraday.new(url: url_for(path))
       res = conn.get do |req|
@@ -65,6 +79,11 @@ module ZohoSdk::Analytics
       end
     end
 
+    # Wrapper for posting JSON via Faraday. Used primarily for IMPORT tasks.
+    # @param path [String] URL path component
+    # @param io [IO] A readable IO object
+    # @param params [Hash] Query parameters for the request
+    # @return [Faraday::Response]
     def post_json(path: nil, io:, params: {})
       conn = Faraday.new(url: url_for(path)) do |conn|
         conn.request :multipart
@@ -89,6 +108,8 @@ module ZohoSdk::Analytics
       end
     end
 
+    # Helper function to build a complete URL path that includes email ID
+    # and encodes path elements.
     def url_for(path = nil)
       parts = [API_BASE_URL, @email]
       if !path.nil?
