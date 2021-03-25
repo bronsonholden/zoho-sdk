@@ -9,7 +9,7 @@ module ZohoSdk::Analytics
   API_BASE_URL = "#{API_HOSTNAME}/#{API_PATH}".freeze
 
   # URL to retrieve access token
-  API_AUTH_HOSTNAME = "https//accounts.zoho.com".freeze
+  API_AUTH_HOSTNAME = "https://accounts.zoho.com".freeze
   API_AUTH_PATH = "oauth/v2/token".freeze
   API_AUTH_BASE_URL = "#{API_AUTH_HOSTNAME}/#{API_AUTH_PATH}".freeze
 
