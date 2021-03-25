@@ -5,6 +5,7 @@ SimpleCov.start
 require "bundler/setup"
 require "webmock/rspec"
 require "support/analytics"
+require "support/analytics/auth_service"
 require "support/analytics/service"
 require "zoho-sdk"
 
@@ -54,6 +55,11 @@ RSpec.configure do |config|
         :any,
         %r{#{Regexp.escape(ZohoSdk::Analytics::API_HOSTNAME)}\/.*}
       ).to_rack(ZohoSdk::TestService::Analytics::Service)
+
+      stub_request(
+        :post,
+        %r{#{Regexp.escape(ZohoSdk::Analytics::API_AUTH_HOSTNAME)}\/.*}
+      ).to_rack(ZohoSdk::TestService::Analytics::AuthService)
     end
   end
 end
