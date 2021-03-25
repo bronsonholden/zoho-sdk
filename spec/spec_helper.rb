@@ -8,7 +8,9 @@ require "support/analytics"
 require "support/analytics/service"
 require "zoho-sdk"
 
-stub = ENV["SPEC_ZOHO_EMAIL"].nil? || ENV["SPEC_ZOHO_AUTHTOKEN"].nil?
+stub =
+  ENV["SPEC_ZOHO_EMAIL"].nil? || ENV["SPEC_ZOHO_CLIENT_ID"].nil? ||
+    ENV["SPEC_ZOHO_CLIENT_SECRET"].nil? || ENV["SPEC_ZOHO_REFRESH_TOKEN"].nil?
 
 if stub
   WebMock.disable_net_connect!(allow_localhost: true)
@@ -20,8 +22,17 @@ module GlobalContext
   extend RSpec::SharedContext
 
   let(:email) { ENV["SPEC_ZOHO_EMAIL"] || "user@email.com" }
-  let(:auth_token) { ENV["SPEC_ZOHO_AUTHTOKEN"] || "authtoken" }
-  let(:client) { ZohoSdk::Analytics::Client.new(email, auth_token) }
+  let(:client_id) { ENV["SPEC_ZOHO_CLIENT_ID"] || "client_id" }
+  let(:client_secret) { ENV["SPEC_ZOHO_CLIENT_SECRET"] || "client_secret" }
+  let(:refresh_token) { ENV["SPEC_ZOHO_REFRESH_TOKEN"] || "refresh_token" }
+  let(:client) do
+    ZohoSdk::Analytics::Client.new(
+      email,
+      client_id,
+      client_secret,
+      refresh_token
+    )
+  end
 end
 
 RSpec.configure do |config|
@@ -39,7 +50,10 @@ RSpec.configure do |config|
 
   if stub
     config.before(:each) do
-      stub_request(:any, /#{Regexp.escape(ZohoSdk::Analytics::API_HOSTNAME)}\/.*/).to_rack(ZohoSdk::TestService::Analytics::Service)
+      stub_request(
+        :any,
+        %r{#{Regexp.escape(ZohoSdk::Analytics::API_HOSTNAME)}\/.*}
+      ).to_rack(ZohoSdk::TestService::Analytics::Service)
     end
   end
 end
