@@ -4,14 +4,15 @@ require "uri"
 module ZohoSdk::Analytics
   class Table
     IMPORT_TYPES = {
-      :append => "APPEND",
-      :truncate_add => "TRUNCATEADD",
-      :update_add => "UPDATEADD"
+      append: "APPEND",
+      truncate_add: "TRUNCATEADD",
+      update_add: "UPDATEADD"
     }.freeze
 
     # @return [Workspace] The table's workspace
     attr_reader :workspace
     attr_reader :columns
+
     # @return [Client] Client object
     attr_reader :client
 
@@ -35,16 +36,20 @@ module ZohoSdk::Analytics
     # @option opts [String] :description The column's description
     def create_column(column_name, type, **opts)
       if !Column::DATA_TYPES.values.include?(type)
-        raise ArgumentError.new("Column type must be one of: #{Column::DATA_TYPES.values.join(', ')}")
+        raise ArgumentError.new(
+                "Column type must be one of: #{Column::DATA_TYPES.values.join(", ")}"
+              )
       end
       @type = type
       @required = opts[:required] || false
       @description = opts[:description] || ""
-      res = client.get path: "#{workspace.name}/#{name}", params: {
-        "ZOHO_ACTION" => "ADDCOLUMN",
-        "ZOHO_COLUMNNAME" => column_name,
-        "ZOHO_DATATYPE" => type.to_s.upcase
-      }
+      res =
+        client.get path: "#{workspace.name}/#{name}",
+                   params: {
+                     "ZOHO_ACTION" => "ADDCOLUMN",
+                     "ZOHO_COLUMNNAME" => column_name,
+                     "ZOHO_DATATYPE" => type.to_s.upcase
+                   }
       if res.success?
         data = JSON.parse(res.body)
         Column.new(column_name, self, client)
@@ -57,10 +62,12 @@ module ZohoSdk::Analytics
     # @param name [String] The column name
     # @return [Column]
     def column(name)
-      res = client.get path: "#{workspace.name}/#{name}", params: {
-        "ZOHO_ACTION" => "ISCOLUMNEXIST",
-        "ZOHO_COLUMN_NAME" => name
-      }
+      res =
+        client.get path: "#{workspace.name}/#{name}",
+                   params: {
+                     "ZOHO_ACTION" => "ISCOLUMNEXIST",
+                     "ZOHO_COLUMN_NAME" => name
+                   }
       if res.success?
         data = JSON.parse(res.body)
         if data.dig("response", "result", "iscolumnexist") == "true"
@@ -76,9 +83,11 @@ module ZohoSdk::Analytics
     end
 
     def rows
-      res = client.get path: "#{workspace.name}/#{name}", params: {
-        "ZOHO_ACTION" => "EXPORT"
-      }
+      res =
+        client.get path: "#{workspace.name}/#{name}",
+                   params: {
+                     "ZOHO_ACTION" => "EXPORT"
+                   }
     end
 
     # Import data into the table using one of three methods: :append,
@@ -94,7 +103,9 @@ module ZohoSdk::Analytics
     # @raise [ArgumentError]
     def import(import_type, data, **opts)
       if !IMPORT_TYPES.keys.include?(import_type)
-        raise ArgumentError.new("import_type must be one of: #{IMPORT_TYPES.keys.join(', ')}")
+        raise ArgumentError.new(
+                "import_type must be one of: #{IMPORT_TYPES.keys.join(", ")}"
+              )
       end
 
       params = {
@@ -109,13 +120,18 @@ module ZohoSdk::Analytics
       if import_type == :update_add
         matching = opts[:matching] || []
         if !matching.is_a?(Array) || matching.size < 1
-          raise ArgumentError.new("Must pass at least one column in `matching` option for UPDATEADD")
+          raise ArgumentError.new(
+                  "Must pass at least one column in `matching` option for UPDATEADD"
+                )
         end
 
-        params["ZOHO_MATCHING_COLUMNS"] = matching.join(',')
+        params["ZOHO_MATCHING_COLUMNS"] = matching.join(",")
       end
 
-      res = client.post_json path: "#{workspace.name}/#{name}", io: StringIO.new(data.to_json), params: params
+      res =
+        client.post_json path: "#{workspace.name}/#{name}",
+                         io: StringIO.new(data.to_json),
+                         params: params
       if res.success?
         data = JSON.parse(res.body)
         data.dig("response", "result", "importSummary", "successRowCount")
@@ -139,9 +155,7 @@ module ZohoSdk::Analytics
     # provided, all rows are deleted.
     # @param criteria [String] The row criteria to match when deleting rows.
     def delete!(criteria = nil)
-      params = {
-        "ZOHO_ACTION" => "DELETE"
-      }
+      params = { "ZOHO_ACTION" => "DELETE" }
 
       params["ZOHO_CRITERIA"] = criteria if !criteria.nil?
 
@@ -158,17 +172,17 @@ module ZohoSdk::Analytics
     # @param row [Hash] Hash of row data. Column names are keys, and cell contents are values.
     def <<(row)
       params = { "ZOHO_ACTION" => "ADDROW" }
-      restricted = %w(
+      restricted = %w[
         ZOHO_ACTION
         ZOHO_API_VERSION
         ZOHO_OUTPUT_FORMAT
         ZOHO_ERROR_FORMAT
-        authtoken
-      )
+      ]
 
-      params = row.reject { |key|
-        !key.is_a?(String) || restricted.include?(key)
-      }.merge(params)
+      params =
+        row.reject do |key|
+          !key.is_a?(String) || restricted.include?(key)
+        end.merge(params)
 
       res = client.get path: "#{workspace.name}/#{name}", params: params
       if res.success?
